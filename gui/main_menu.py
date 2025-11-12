@@ -78,4 +78,7 @@ class MainMenu(QMainWindow):
         self.game_settings = settings
 
     def start_game(self):
-        print("Start game")
+        from game.game_window import GameWindow
+        self.game_window = GameWindow(self.game_settings)
+        self.stacked_widget.addWidget(self.game_window)
+        self.stacked_widget.setCurrentWidget(self.game_window)
