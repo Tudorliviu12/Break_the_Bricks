@@ -59,6 +59,8 @@ class GameWindow(QWidget):
 
         self.start_countdown()
 
+        self.setFocusPolicy(Qt.StrongFocus)
+
     def start_countdown(self):
         self.countdown_label.show()
         self.countdown_value = 3
@@ -79,6 +81,23 @@ class GameWindow(QWidget):
             self.countdown_timer.stop()
             self.countdown_label.hide()
             self.start_game()
+
+
+    def keyPressEvent(self, event):
+        if not self.game_started:
+            return
+
+        key = event.key()
+        paddle_speed = 8
+        if key == Qt.Key_Left or key == Qt.Key_A:
+            new_x = self.paddle.x() - paddle_speed
+            if new_x >= 0:
+                self.paddle.setX(new_x)
+
+        elif key == Qt.Key_Right or key == Qt.Key_D:
+            new_x = self.paddle.x() + paddle_speed
+            if new_x + self.paddle.pixmap().width() <= 700:
+                self.paddle.setX(new_x)
 
     def start_game(self):
         self.game_started = True
