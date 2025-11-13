@@ -82,4 +82,6 @@ class GameWindow(QWidget):
 
     def start_game(self):
         self.game_started = True
-        print("Game started!")
+        from game.paddle import Paddle
+        self.paddle = Paddle()
+        self.scene.addItem(self.paddle)
