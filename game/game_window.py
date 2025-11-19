@@ -11,6 +11,8 @@ class GameWindow(QWidget):
         self.score = 0
         self.game_started = False
 
+        self.keys_pressed = set()
+
         self.init_ui()
 
     def init_ui(self):
@@ -36,6 +38,7 @@ class GameWindow(QWidget):
 
         layout.addWidget(self.view)
         self.setLayout(layout)
+        self.setFocusPolicy(Qt.StrongFocus)
 
         self.countdown_label = QLabel(self)
         self.countdown_label.setAlignment(Qt.AlignCenter)
@@ -57,9 +60,22 @@ class GameWindow(QWidget):
         self.countdown_label.setGeometry(0, 0, 700, 500)
         self.countdown_label.hide()
 
+        self.setup_game_elements()
         self.start_countdown()
 
-        self.setFocusPolicy(Qt.StrongFocus)
+    def setup_game_elements(self):
+        from game.paddle import Paddle
+        from game.ball import Ball
+
+        self.paddle = Paddle()
+        self.scene.addItem(self.paddle)
+
+        self.ball = Ball()
+        self.scene.addItem(self.ball)
+
+        self.movement_timer = QTimer()
+        self.movement_timer.timeout.connect(self.update_movement)
+        self.movement_timer.start(16)
 
     def start_countdown(self):
         self.countdown_label.show()
@@ -82,25 +98,28 @@ class GameWindow(QWidget):
             self.countdown_label.hide()
             self.start_game()
 
+    def start_game(self):
+        self.game_started = True
+        print("Game started!")
 
     def keyPressEvent(self, event):
-        if not self.game_started:
+        self.keys_pressed.add(event.key())
+
+    def keyReleaseEvent(self, event):
+        self.keys_pressed.discard(event.key())
+
+    def update_movement(self):
+        if not self.game_started or not hasattr(self, 'paddle'):
             return
 
-        key = event.key()
-        paddle_speed = 8
-        if key == Qt.Key_Left or key == Qt.Key_A:
+        paddle_speed = 5
+
+        if Qt.Key_Left in self.keys_pressed or Qt.Key_A in self.keys_pressed:
             new_x = self.paddle.x() - paddle_speed
             if new_x >= 0:
                 self.paddle.setX(new_x)
 
-        elif key == Qt.Key_Right or key == Qt.Key_D:
+        if Qt.Key_Right in self.keys_pressed or Qt.Key_D in self.keys_pressed:
             new_x = self.paddle.x() + paddle_speed
             if new_x + self.paddle.pixmap().width() <= 700:
                 self.paddle.setX(new_x)
-
-    def start_game(self):
-        self.game_started = True
-        from game.paddle import Paddle
-        self.paddle = Paddle()
-        self.scene.addItem(self.paddle)
