@@ -123,3 +123,13 @@ class GameWindow(QWidget):
             new_x = self.paddle.x() + paddle_speed
             if new_x + self.paddle.pixmap().width() <= 700:
                 self.paddle.setX(new_x)
+
+        self.ball.setPos(self.ball.x() + self.ball.dx, self.ball.y() + self.ball.dy)
+        if self.ball.x() <= 0 or self.ball.x() + self.ball.pixmap().width() >= 700:
+            self.ball.dx = -self.ball.dx
+
+        if self.ball.y() <=0:
+            self.ball.dy = -self.ball.dy
+
+        if self.ball.y() + self.ball.pixmap().height() >= 500:
+            self.ball.dy = -self.ball.dy
