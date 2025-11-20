@@ -66,6 +66,7 @@ class GameWindow(QWidget):
     def setup_game_elements(self):
         from game.paddle import Paddle
         from game.ball import Ball
+        from game.brick import Brick
 
         self.paddle = Paddle()
         self.scene.addItem(self.paddle)
@@ -76,6 +77,26 @@ class GameWindow(QWidget):
         self.movement_timer = QTimer()
         self.movement_timer.timeout.connect(self.update_movement)
         self.movement_timer.start(16)
+
+        self.bricks = []
+        colors = ["red", "yellow", "green", "blue"]
+        rows = 4
+        cols = 10
+
+        start_x = 20
+        start_y = 30
+        spacing_x = 65
+        spacing_y = 35
+
+        for row in range(rows):
+            for col in range(cols):
+                color = colors[row]
+                brick = Brick(color)
+                x = start_x + col * spacing_x
+                y = start_y + row * spacing_y
+                brick.setPos(x,y)
+                self.scene.addItem(brick)
+                self.bricks.append(brick)
 
     def start_countdown(self):
         self.countdown_label.show()
