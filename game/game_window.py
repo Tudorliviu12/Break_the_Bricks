@@ -133,3 +133,12 @@ class GameWindow(QWidget):
 
         if self.ball.y() + self.ball.pixmap().height() >= 500:
             self.ball.dy = -self.ball.dy
+
+        if self.ball.collidesWithItem(self.paddle):
+            self.ball.dy =-abs(self.ball.dy)
+            self.ball.setY(self.paddle.y() - self.ball.pixmap().height())
+
+            paddle_center = self.paddle.x() + self.paddle.pixmap().width() / 2
+            ball_center = self.ball.x() + self.ball.pixmap().width() / 2
+            offset = (paddle_center - ball_center) / 50
+            self.ball.dx = self.ball.dx + offset
