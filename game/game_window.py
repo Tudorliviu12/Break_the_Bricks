@@ -146,20 +146,36 @@ class GameWindow(QWidget):
                 self.paddle.setX(new_x)
 
         self.ball.setPos(self.ball.x() + self.ball.dx, self.ball.y() + self.ball.dy)
+
         if self.ball.x() <= 0 or self.ball.x() + self.ball.pixmap().width() >= 700:
             self.ball.dx = -self.ball.dx
 
-        if self.ball.y() <=0:
+        if self.ball.y() <= 0:
             self.ball.dy = -self.ball.dy
 
         if self.ball.y() + self.ball.pixmap().height() >= 500:
             self.ball.dy = -self.ball.dy
 
         if self.ball.collidesWithItem(self.paddle):
-            self.ball.dy =-abs(self.ball.dy)
+            self.ball.dy = -abs(self.ball.dy)
             self.ball.setY(self.paddle.y() - self.ball.pixmap().height())
 
             paddle_center = self.paddle.x() + self.paddle.pixmap().width() / 2
             ball_center = self.ball.x() + self.ball.pixmap().width() / 2
             offset = (paddle_center - ball_center) / 50
             self.ball.dx = self.ball.dx + offset
+
+        colliding_items = self.ball.collidingItems()
+        for item in colliding_items:
+            if item in self.bricks:
+                self.ball.dy = -self.ball.dy
+                self.scene.removeItem(item)
+                self.bricks.remove(item)
+                self.score += 10
+                print(f"Scor: {self.score}")
+
+                if len(self.bricks) == 0:
+                    print("YOU WON!")
+                    self.game_started = False
+
+                break
