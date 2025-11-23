@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QLabel, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QLabel, QVBoxLayout, QPushButton, QHBoxLayout
+from gui.styles import BUTTON_STYLE
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QPalette, QBrush, QPixmap
 
@@ -60,13 +61,61 @@ class GameWindow(QWidget):
         self.countdown_label.setGeometry(0, 0, 700, 500)
         self.countdown_label.hide()
 
+
+        self.end_message_label = QLabel(self)
+        self.end_message_label.setAlignment(Qt.AlignCenter)
+        self.end_message_label.setStyleSheet("""
+            QLabel {
+                color: white;
+                font-size: 72px;
+                font-weight: bold;
+                font-family: 'Impact', 'Arial Black', sans-serif;
+                background: rgba(0, 0, 0, 150);
+                border-radius: 20px;
+                padding: 20px;
+            }
+        """)
+        self.end_message_label.setGeometry(0, 0, 700, 500)
+        self.end_message_label.hide()
+
+        self.end_buttons_container = QWidget(self)
+        self.end_buttons_container.setGeometry(0, 0, 700, 800)
+        self.end_buttons_container.hide()
+
+        buttons_layout = QVBoxLayout(self.end_buttons_container)
+        buttons_layout.setContentsMargins(0, 0, 0, 50)
+        buttons_layout.setSpacing(15)
+
+        buttons_layout.addStretch(1)
+
+        row = QHBoxLayout()
+        row.addStretch(1)
+
+        self.play_again_button = QPushButton("PLAY AGAIN")
+        self.play_again_button.setStyleSheet(BUTTON_STYLE)
+        self.play_again_button.setCursor(Qt.PointingHandCursor)
+        self.play_again_button.clicked.connect(self.restart_game)
+        row.addWidget(self.play_again_button)
+
+        row.addSpacing(20)
+
+        self.exit_button = QPushButton("EXIT TO MENU")
+        self.exit_button.setStyleSheet(BUTTON_STYLE)
+        self.exit_button.setCursor(Qt.PointingHandCursor)
+        self.exit_button.clicked.connect(self.exit_to_menu)
+        row.addWidget(self.exit_button)
+
+        row.addStretch(1)
+
+        buttons_layout.addLayout(row)
+        buttons_layout.addStretch(1)
+
         self.setup_game_elements()
         self.start_countdown()
 
     def setup_game_elements(self):
         from game.paddle import Paddle
         from game.ball import Ball
-        from game.brick import Brick
 
         self.paddle = Paddle()
         self.scene.addItem(self.paddle)
@@ -77,6 +126,11 @@ class GameWindow(QWidget):
         self.movement_timer = QTimer()
         self.movement_timer.timeout.connect(self.update_movement)
         self.movement_timer.start(16)
+
+        self.create_bricks()
+
+    def create_bricks(self):
+        from game.brick import Brick
 
         self.bricks = []
         colors = ["red", "yellow", "green", "blue"]
@@ -94,9 +148,16 @@ class GameWindow(QWidget):
                 brick = Brick(color)
                 x = start_x + col * spacing_x
                 y = start_y + row * spacing_y
-                brick.setPos(x,y)
+                brick.setPos(x, y)
                 self.scene.addItem(brick)
                 self.bricks.append(brick)
+
+    def reset_ball_and_paddle(self):
+        self.ball.setPos(340, 240)
+        self.ball.dx = 3
+        self.ball.dy = 3
+
+        self.paddle.setPos(300, 450)
 
     def start_countdown(self):
         self.countdown_label.show()
@@ -122,6 +183,12 @@ class GameWindow(QWidget):
     def start_game(self):
         self.game_started = True
         print("Game started!")
+
+    def show_end_message(self, text):
+        self.end_message_label.setText(text)
+        self.end_message_label.show()
+        self.end_buttons_container.show()
+        self.game_started = False
 
     def keyPressEvent(self, event):
         self.keys_pressed.add(event.key())
@@ -154,7 +221,16 @@ class GameWindow(QWidget):
             self.ball.dy = -self.ball.dy
 
         if self.ball.y() + self.ball.pixmap().height() >= 500:
-            self.ball.dy = -self.ball.dy
+            self.lives -= 1
+            print(f"Vieti ramase: {self.lives}")
+
+            if self.lives <= 0:
+                self.end_game(won=False)
+                return
+            else:
+                self.ball.setPos(340, 240)
+                self.ball.dy = -abs(self.ball.dy)
+                return
 
         if self.ball.collidesWithItem(self.paddle):
             self.ball.dy = -abs(self.ball.dy)
@@ -175,7 +251,57 @@ class GameWindow(QWidget):
                 print(f"Scor: {self.score}")
 
                 if len(self.bricks) == 0:
-                    print("YOU WON!")
-                    self.game_started = False
+                    self.end_game(won=True)
 
                 break
+
+    def end_game(self, won: bool):
+        # oprim mișcarea mingii
+        self.game_started = False
+        if hasattr(self, "movement_timer"):
+            self.movement_timer.stop()
+
+        if won:
+            text = f"You won!\nScore: {self.score}"
+        else:
+            text = f"Game Over!\nScore: {self.score}"
+
+        self.show_end_message(text)
+
+    def restart_game(self):
+        self.end_message_label.hide()
+        self.end_buttons_container.hide()
+
+        self.lives = 3
+        self.score = 0
+
+        if hasattr(self, "bricks"):
+            for brick in self.bricks:
+                self.scene.removeItem(brick)
+        self.bricks = []
+
+        self.create_bricks()
+
+        self.reset_ball_and_paddle()
+
+        if hasattr(self, "movement_timer"):
+            self.movement_timer.start(16)
+
+        self.start_countdown()
+
+    def exit_to_menu(self):
+        self.game_started = False
+        if hasattr(self, "movement_timer"):
+            self.movement_timer.stop()
+
+        self.end_message_label.hide()
+        self.end_buttons_container.hide()
+
+        parent = self.parent()
+        while parent is not None and not hasattr(parent, "show_menu"):
+            parent = parent.parent()
+
+        if parent is not None and hasattr(parent, "show_menu"):
+            parent.show_menu()
+
+
