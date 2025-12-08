@@ -245,13 +245,13 @@ class GameWindow(QWidget):
         for item in colliding_items:
             if item in self.bricks:
                 self.ball.dy = -self.ball.dy
-                self.scene.removeItem(item)
-                self.bricks.remove(item)
-                self.score += 10
-                print(f"Scor: {self.score}")
-
-                if len(self.bricks) == 0:
-                    self.end_game(won=True)
+                is_destroyed = item.hit()
+                if is_destroyed:
+                    self.scene.removeItem(item)
+                    self.bricks.remove(item)
+                    self.score += 10
+                    if len(self.bricks) == 0:
+                        self.end_game(won=True)
 
                 break
 
@@ -303,5 +303,3 @@ class GameWindow(QWidget):
 
         if parent is not None and hasattr(parent, "show_menu"):
             parent.show_menu()
-
-
