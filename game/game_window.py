@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QLabel, QVBoxLayout, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QLabel, QVBoxLayout, QPushButton, QHBoxLayout, \
+    QGraphicsPixmapItem
 from gui.styles import BUTTON_STYLE
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QPalette, QBrush, QPixmap
@@ -11,9 +12,9 @@ class GameWindow(QWidget):
         self.lives = 3
         self.score = 0
         self.game_started = False
-
+        self.ball_frozen = False
+        self.heart_items = []
         self.keys_pressed = set()
-
         self.init_ui()
 
     def init_ui(self):
@@ -128,6 +129,7 @@ class GameWindow(QWidget):
         self.movement_timer.start(16)
 
         self.create_bricks()
+        self.draw_hearts()
 
     def create_bricks(self):
         from game.brick import Brick
@@ -151,6 +153,19 @@ class GameWindow(QWidget):
                 brick.setPos(x, y)
                 self.scene.addItem(brick)
                 self.bricks.append(brick)
+
+    def draw_hearts(self):
+        for heart in self.heart_items:
+            self.scene.removeItem(heart)
+        self.heart_items.clear()
+        heart_pixmap = QPixmap('assets/images/heart.png')
+        heart_pixmap = heart_pixmap.scaled(30, 30, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        for i in range(self.lives):
+            heart_item = QGraphicsPixmapItem(heart_pixmap)
+            heart_item.setPos(660 - (i * 35), 10)
+            self.scene.addItem(heart_item)
+            self.heart_items.append(heart_item)
+
 
     def reset_ball_and_paddle(self):
         self.ball.setPos(340, 240)
@@ -212,6 +227,9 @@ class GameWindow(QWidget):
             if new_x + self.paddle.pixmap().width() <= 700:
                 self.paddle.setX(new_x)
 
+        if self.ball_frozen:
+            return
+
         self.ball.setPos(self.ball.x() + self.ball.dx, self.ball.y() + self.ball.dy)
 
         if self.ball.x() <= 0 or self.ball.x() + self.ball.pixmap().width() >= 700:
@@ -222,14 +240,18 @@ class GameWindow(QWidget):
 
         if self.ball.y() + self.ball.pixmap().height() >= 500:
             self.lives -= 1
-            print(f"Vieti ramase: {self.lives}")
+
+            if self.heart_items:
+                last_heart = self.heart_items.pop()
+                self.scene.removeItem(last_heart)
 
             if self.lives <= 0:
                 self.end_game(won=False)
                 return
             else:
-                self.ball.setPos(340, 240)
-                self.ball.dy = -abs(self.ball.dy)
+                self.ball.setPos(340, 180)
+                self.ball_frozen = True
+                QTimer.singleShot(1000, self.unfreeze_ball)
                 return
 
         if self.ball.collidesWithItem(self.paddle):
@@ -255,8 +277,11 @@ class GameWindow(QWidget):
 
                 break
 
+    def unfreeze_ball(self):
+        if self.game_started:
+            self.ball_frozen = False
+
     def end_game(self, won: bool):
-        # oprim mișcarea mingii
         self.game_started = False
         if hasattr(self, "movement_timer"):
             self.movement_timer.stop()
@@ -271,7 +296,7 @@ class GameWindow(QWidget):
     def restart_game(self):
         self.end_message_label.hide()
         self.end_buttons_container.hide()
-
+        self.ball_frozen = False
         self.lives = 3
         self.score = 0
 
@@ -283,6 +308,7 @@ class GameWindow(QWidget):
         self.create_bricks()
 
         self.reset_ball_and_paddle()
+        self.draw_hearts()
 
         if hasattr(self, "movement_timer"):
             self.movement_timer.start(16)
