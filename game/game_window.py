@@ -15,12 +15,13 @@ class GameWindow(QWidget):
         self.ball_frozen = False
         self.heart_items = []
         self.keys_pressed = set()
+        self.is_grayscale = not self.settings.get('colored_bricks', True)
         self.init_ui()
 
     def init_ui(self):
         palette = QPalette()
-        background = QPixmap('assets/images/fundal.jpg').scaled(700, 500, Qt.KeepAspectRatioByExpanding,
-                                                               Qt.SmoothTransformation)
+        bg_image = 'assets/images/fundal2.png' if self.is_grayscale else 'assets/images/fundal.jpg'
+        background = QPixmap(bg_image).scaled(700, 500, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
         palette.setBrush(QPalette.Window, QBrush(background))
         self.setPalette(palette)
         self.setAutoFillBackground(True)
@@ -118,7 +119,7 @@ class GameWindow(QWidget):
         from game.paddle import Paddle
         from game.ball import Ball
 
-        self.paddle = Paddle()
+        self.paddle = Paddle(is_grayscale=self.is_grayscale)
         self.scene.addItem(self.paddle)
 
         self.ball = Ball()
@@ -147,7 +148,7 @@ class GameWindow(QWidget):
         for row in range(rows):
             for col in range(cols):
                 color = colors[row]
-                brick = Brick(color)
+                brick = Brick(color, is_grayscale=self.is_grayscale)
                 x = start_x + col * spacing_x
                 y = start_y + row * spacing_y
                 brick.setPos(x, y)
@@ -158,7 +159,8 @@ class GameWindow(QWidget):
         for heart in self.heart_items:
             self.scene.removeItem(heart)
         self.heart_items.clear()
-        heart_pixmap = QPixmap('assets/images/heart.png')
+        heart_img = 'assets/images/heart2.png' if self.is_grayscale else 'assets/images/heart.png'
+        heart_pixmap = QPixmap(heart_img)
         heart_pixmap = heart_pixmap.scaled(30, 30, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         for i in range(self.lives):
             heart_item = QGraphicsPixmapItem(heart_pixmap)
@@ -171,7 +173,7 @@ class GameWindow(QWidget):
         self.ball.setPos(340, 240)
         self.ball.dx = 3
         self.ball.dy = 3
-
+        self.ball.dy = -abs(self.ball.dy)
         self.paddle.setPos(300, 450)
 
     def start_countdown(self):
@@ -249,7 +251,7 @@ class GameWindow(QWidget):
                 self.end_game(won=False)
                 return
             else:
-                self.ball.setPos(340, 180)
+                self.reset_ball_and_paddle()
                 self.ball_frozen = True
                 QTimer.singleShot(1000, self.unfreeze_ball)
                 return

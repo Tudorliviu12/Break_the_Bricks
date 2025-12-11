@@ -18,27 +18,27 @@ class MainMenu(QMainWindow):
     def init_ui(self):
         self.stacked_widget = QStackedWidget()
         self.menu_page = self.create_menu_page()
+
         self.settings_page = SettingsWidget(self)
         self.settings_page.back_button_clicked.connect(self.show_menu)
         self.settings_page.settings_changed.connect(self.update_settings)
+
         self.stacked_widget.addWidget(self.menu_page)
         self.stacked_widget.addWidget(self.settings_page)
         self.setCentralWidget(self.stacked_widget)
+        self.update_menu_appearance()
 
     def create_menu_page(self):
-        container = QWidget()
-        container.setStyleSheet(BACKGROUND_STYLE)
+        self.menu_container = QWidget()
         layout = QVBoxLayout()
         layout.setContentsMargins(50, 30, 50, 30)
         layout.setSpacing(15)
 
-        title = QLabel()
-        title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("background: transparent;")
-        title_pixmap = QPixmap('assets/images/title.png')
-        title_pixmap = title_pixmap.scaledToWidth(380, Qt.SmoothTransformation)
-        title.setPixmap(title_pixmap)
-        layout.addWidget(title)
+        self.title_label = QLabel()
+        self.title_label.setAlignment(Qt.AlignCenter)
+        self.title_label.setStyleSheet("background: transparent;")
+
+        layout.addWidget(self.title_label)
         layout.addStretch(1)
 
         start_button = QPushButton("START GAME")
@@ -60,9 +60,9 @@ class MainMenu(QMainWindow):
         layout.addWidget(settings_button)
         layout.addWidget(exit_button)
         layout.addStretch(1)
-        container.setLayout(layout)
+        self.menu_container.setLayout(layout)
 
-        return container
+        return self.menu_container
 
     def show_settings(self):
         self.settings_page.colored_button.setChecked(self.game_settings['colored_bricks'])
@@ -76,6 +76,25 @@ class MainMenu(QMainWindow):
 
     def update_settings(self, settings):
         self.game_settings = settings
+        self.update_menu_appearance()
+
+    def update_menu_appearance(self):
+        is_grayscale = not self.game_settings.get('colored_bricks', True)
+
+        title_img = 'assets/images/title2.png' if is_grayscale else 'assets/images/title.png'
+        pixmap = QPixmap(title_img)
+        pixmap = pixmap.scaledToWidth(380, Qt.SmoothTransformation)
+        self.title_label.setPixmap(pixmap)
+        bg_img = 'assets/images/fundal2.png' if is_grayscale else 'assets/images/fundal.jpg'
+
+        new_style = f"""
+            QWidget {{
+                background-image: url('{bg_img}');
+                background-repeat: no-repeat;
+                background-position: center;
+            }}
+        """
+        self.menu_container.setStyleSheet(new_style)
 
     def start_game(self):
         from game.game_window import GameWindow

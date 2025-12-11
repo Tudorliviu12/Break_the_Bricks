@@ -17,11 +17,7 @@ class SettingsWidget(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        palette = QPalette()
-        background = QPixmap('assets/images/fundal.jpg').scaled(700, 500, Qt.KeepAspectRatioByExpanding,
-                                                               Qt.SmoothTransformation)
-        palette.setBrush(QPalette.Window, QBrush(background))
-        self.setPalette(palette)
+        self.update_background(not self.colored_bricks)
         self.setAutoFillBackground(True)
 
         main_layout = QVBoxLayout()
@@ -141,6 +137,13 @@ class SettingsWidget(QWidget):
 
         self.setLayout(main_layout)
 
+    def update_background(self, is_grayscale):
+        palette = QPalette()
+        image_name = 'assets/images/fundal2.png' if is_grayscale else 'assets/images/fundal.jpg'
+        background = QPixmap(image_name).scaled(700, 500, Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
+        palette.setBrush(QPalette.Window, QBrush(background))
+        self.setPalette(palette)
+
     def get_color_button_style(self):
         return """
             QPushButton {
@@ -215,11 +218,13 @@ class SettingsWidget(QWidget):
         self.colored_button.setChecked(True)
         self.grayscale_button.setChecked(False)
         self.colored_bricks = True
+        self.update_background(False)
 
     def on_grayscale_clicked(self):
         self.grayscale_button.setChecked(True)
         self.colored_button.setChecked(False)
         self.colored_bricks = False
+        self.update_background(True)
 
     def on_sound_clicked(self, checked):
         self.sound_enabled = checked
