@@ -63,7 +63,6 @@ class GameWindow(QWidget):
         self.countdown_label.setGeometry(0, 0, 700, 500)
         self.countdown_label.hide()
 
-
         self.end_message_label = QLabel(self)
         self.end_message_label.setAlignment(Qt.AlignCenter)
         self.end_message_label.setStyleSheet("""
@@ -122,7 +121,7 @@ class GameWindow(QWidget):
         self.paddle = Paddle(is_grayscale=self.is_grayscale)
         self.scene.addItem(self.paddle)
 
-        self.ball = Ball()
+        self.ball = Ball(is_grayscale=self.is_grayscale)
         self.scene.addItem(self.ball)
 
         self.movement_timer = QTimer()
@@ -159,7 +158,9 @@ class GameWindow(QWidget):
         for heart in self.heart_items:
             self.scene.removeItem(heart)
         self.heart_items.clear()
+
         heart_img = 'assets/images/heart2.png' if self.is_grayscale else 'assets/images/heart.png'
+
         heart_pixmap = QPixmap(heart_img)
         heart_pixmap = heart_pixmap.scaled(30, 30, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         for i in range(self.lives):
@@ -167,7 +168,6 @@ class GameWindow(QWidget):
             heart_item.setPos(660 - (i * 35), 10)
             self.scene.addItem(heart_item)
             self.heart_items.append(heart_item)
-
 
     def reset_ball_and_paddle(self):
         self.ball.setPos(340, 240)
@@ -199,7 +199,6 @@ class GameWindow(QWidget):
 
     def start_game(self):
         self.game_started = True
-        print("Game started!")
 
     def show_end_message(self, text):
         self.end_message_label.setText(text)
@@ -276,7 +275,6 @@ class GameWindow(QWidget):
                     self.score += 10
                     if len(self.bricks) == 0:
                         self.end_game(won=True)
-
                 break
 
     def unfreeze_ball(self):

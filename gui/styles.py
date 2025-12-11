@@ -35,3 +35,33 @@ BACKGROUND_STYLE = """
         background-position: center;
     }
 """
+
+BUTTON_STYLE_GRAY = """
+    QPushButton {
+        background: qlineargradient(
+            x1:0, y1:0, x2:0, y2:1,
+            stop:0 #404040,
+            stop:1 #1a1a1a
+        );
+        border: 2px solid #808080;
+        border-radius: 10px;
+        color: #d9d9d9;
+        font-size: 18px;
+        font-weight: bold;
+        font-family: Arial;
+        padding: 8px;
+        min-height: 35px;
+    }
+    QPushButton:hover {
+        background: qlineargradient(
+            x1:0, y1:0, x2:0, y2:1,
+            stop:0 #595959,
+            stop:1 #404040
+        );
+        border: 2px solid #bfbfbf;
+    }
+    QPushButton:pressed {
+        background: #000000;
+        border: 2px solid #4d4d4d;
+    }
+"""
