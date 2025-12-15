@@ -3,6 +3,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from .styles import BUTTON_STYLE, BACKGROUND_STYLE, BUTTON_STYLE_GRAY
 from .settings_window import SettingsWidget
+from game.sound_manager import SoundManager
 
 
 class MainMenu(QMainWindow):
@@ -14,6 +15,8 @@ class MainMenu(QMainWindow):
             'colored_bricks': True,
             'sound_enabled': True
         }
+        self.sound_manager = SoundManager()
+        self.sound_manager.start_background_music()
         self.init_ui()
 
     def init_ui(self):
@@ -78,6 +81,7 @@ class MainMenu(QMainWindow):
 
     def update_settings(self, settings):
         self.game_settings = settings
+        self.sound_manager.update_volume_settings(settings['sound_enabled'])
         self.update_menu_appearance()
 
     def update_menu_appearance(self):
@@ -104,6 +108,6 @@ class MainMenu(QMainWindow):
 
     def start_game(self):
         from game.game_window import GameWindow
-        self.game_window = GameWindow(self.game_settings, parent=self)
+        self.game_window = GameWindow(self.game_settings, self.sound_manager, parent=self)
         self.stacked_widget.addWidget(self.game_window)
         self.stacked_widget.setCurrentWidget(self.game_window)

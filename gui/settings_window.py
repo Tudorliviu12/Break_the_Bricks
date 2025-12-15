@@ -163,26 +163,32 @@ class SettingsWidget(QWidget):
             }}
         """
 
+    def emit_settings_update(self):
+        settings = {
+            'colored_bricks': self.colored_bricks,
+            'sound_enabled': self.sound_enabled
+        }
+        self.settings_changed.emit(settings)
+
     def on_colored_clicked(self):
         self.colored_button.setChecked(True)
         self.grayscale_button.setChecked(False)
         self.colored_bricks = True
         self.update_appearance(False)
+        self.emit_settings_update()
 
     def on_grayscale_clicked(self):
         self.grayscale_button.setChecked(True)
         self.colored_button.setChecked(False)
         self.colored_bricks = False
         self.update_appearance(True)
+        self.emit_settings_update()
 
     def on_sound_clicked(self, checked):
         self.sound_enabled = checked
         self.sound_button.setText("ON" if checked else "OFF")
+        self.emit_settings_update()
 
     def back_to_menu(self):
-        settings = {
-            'colored_bricks': self.colored_bricks,
-            'sound_enabled': self.sound_enabled
-        }
-        self.settings_changed.emit(settings)
+        self.emit_settings_update()
         self.back_button_clicked.emit()

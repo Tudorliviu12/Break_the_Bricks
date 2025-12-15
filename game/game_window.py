@@ -6,11 +6,12 @@ from PyQt5.QtGui import QFont, QPalette, QBrush, QPixmap
 
 
 class GameWindow(QWidget):
-    def __init__(self, settings, parent=None):
+    def __init__(self, settings, sound_manager, parent=None):
         super().__init__(parent)
         self.settings = settings
         self.lives = 3
         self.score = 0
+        self.sound_manager = sound_manager
         self.game_started = False
         self.ball_frozen = False
         self.heart_items = []
@@ -235,9 +236,11 @@ class GameWindow(QWidget):
 
         if self.ball.x() <= 0 or self.ball.x() + self.ball.pixmap().width() >= 700:
             self.ball.dx = -self.ball.dx
+            #self.sound_manager.play_hit_sound()
 
         if self.ball.y() <= 0:
             self.ball.dy = -self.ball.dy
+            #self.sound_manager.play_hit_sound()
 
         if self.ball.y() + self.ball.pixmap().height() >= 500:
             self.lives -= 1
@@ -259,6 +262,8 @@ class GameWindow(QWidget):
             self.ball.dy = -abs(self.ball.dy)
             self.ball.setY(self.paddle.y() - self.ball.pixmap().height())
 
+            #self.sound_manager.play_hit_sound()
+
             paddle_center = self.paddle.x() + self.paddle.pixmap().width() / 2
             ball_center = self.ball.x() + self.ball.pixmap().width() / 2
             offset = (paddle_center - ball_center) / 50
@@ -268,6 +273,7 @@ class GameWindow(QWidget):
         for item in colliding_items:
             if item in self.bricks:
                 self.ball.dy = -self.ball.dy
+                #self.sound_manager.play_hit_sound()
                 is_destroyed = item.hit()
                 if is_destroyed:
                     self.scene.removeItem(item)
