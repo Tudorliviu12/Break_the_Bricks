@@ -273,7 +273,7 @@ class GameWindow(QWidget):
         for item in colliding_items:
             if item in self.bricks:
                 self.ball.dy = -self.ball.dy
-                #self.sound_manager.play_hit_sound()
+                self.sound_manager.play_hit_sound()
                 is_destroyed = item.hit()
                 if is_destroyed:
                     self.scene.removeItem(item)
