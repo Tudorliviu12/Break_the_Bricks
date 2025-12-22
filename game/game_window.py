@@ -141,7 +141,7 @@ class GameWindow(QWidget):
         cols = 10
 
         start_x = 20
-        start_y = 30
+        start_y = 50
         spacing_x = 65
         spacing_y = 35
 
@@ -255,7 +255,7 @@ class GameWindow(QWidget):
             else:
                 self.reset_ball_and_paddle()
                 self.ball_frozen = True
-                QTimer.singleShot(1000, self.unfreeze_ball)
+                QTimer.singleShot(200, self.unfreeze_ball)
                 return
 
         if self.ball.collidesWithItem(self.paddle):
