@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QGraphicsView, QGraphicsScene, QLabel, QVBoxLayout, QPushButton, QHBoxLayout, \
     QGraphicsPixmapItem
-from gui.styles import BUTTON_STYLE
+from gui.styles import BUTTON_STYLE, BUTTON_STYLE_GRAY
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QPalette, QBrush, QPixmap
 
@@ -92,9 +92,9 @@ class GameWindow(QWidget):
 
         row = QHBoxLayout()
         row.addStretch(1)
-
+        current_style = BUTTON_STYLE_GRAY if self.is_grayscale else BUTTON_STYLE
         self.play_again_button = QPushButton("PLAY AGAIN")
-        self.play_again_button.setStyleSheet(BUTTON_STYLE)
+        self.play_again_button.setStyleSheet(current_style)
         self.play_again_button.setCursor(Qt.PointingHandCursor)
         self.play_again_button.clicked.connect(self.restart_game)
         row.addWidget(self.play_again_button)
@@ -102,7 +102,7 @@ class GameWindow(QWidget):
         row.addSpacing(20)
 
         self.exit_button = QPushButton("EXIT TO MENU")
-        self.exit_button.setStyleSheet(BUTTON_STYLE)
+        self.exit_button.setStyleSheet(current_style)
         self.exit_button.setCursor(Qt.PointingHandCursor)
         self.exit_button.clicked.connect(self.exit_to_menu)
         row.addWidget(self.exit_button)
